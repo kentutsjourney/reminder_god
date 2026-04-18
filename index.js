@@ -49,6 +49,7 @@ bot.on('text', (ctx) => {
         ctx.reply('cabul');
     }
     if (pesan === 'p') {
+
         ctx.reply('p apa');
     }
     if (pesan === 'el') {
