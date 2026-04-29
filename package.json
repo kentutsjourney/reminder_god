@@ -1,19 +1,14 @@
 {
-  "name": "kentutreminder",
+  "name": "bot-journey",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Bot Journey for Vercel",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node api/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "axios": "^1.15.0",
-    "dotenv": "^17.4.2",
-    "node-cron": "^4.2.1",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
     "telegraf": "^4.16.3"
   }
 }
