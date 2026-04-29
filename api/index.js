@@ -1,95 +1,61 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const axios = require('axios');
-const cron = require('node-cron');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-
-// ID Grup kamu
 const targetGroupId = '-1003807658725';
 
-// 1. Fungsi Ambil Jadwal (Tetap sama)
+// Fungsi ambil jadwal sholat (tanpa cache karena serverless tidak simpan memori)
 async function getJadwalSholat() {
     try {
         const d = new Date();
-        const url = `https://api.myquran.com/v2/sholat/jadwal/1301/${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+        const tanggal = d.getDate();
+        const bulan = d.getMonth() + 1;
+        const tahun = d.getFullYear();
+        const url = `https://api.myquran.com/v2/sholat/jadwal/1301/${tahun}/${bulan}/${tanggal}`;
         const response = await axios.get(url);
         return response.data.data.jadwal;
     } catch (error) {
-        console.error("API Error:", error.message);
+        console.error("❌ API Error:", error.message);
         return null;
     }
 }
 
-// 2. PRIORITAS: Perintah Command (Harus di atas bot.on)
-bot.command('tes', (ctx) => {
-    console.log("Menerima perintah /tes");
-    ctx.reply("apadah di tes mulu.");
-});
+// --- Logic Bot ---
+bot.command('tes', (ctx) => ctx.reply("apadah di tes mulu."));
+bot.command('setup_grup', (ctx) => ctx.reply('✅ Grup ini sudah terdaftar.'));
 
-bot.command('setup_grup', (ctx) => {
-    ctx.reply('✅ Grup ini sudah terdaftar untuk pengingat otomatis.');
-});
-
-// 3. Respon Text Biasa (Taruh di bawah command)
 bot.on('text', (ctx) => {
-    console.log(`Pesan masuk dari ${ctx.chat.title}: ${ctx.message.text}`);
-
     const pesan = ctx.message.text.toLowerCase();
-    if (pesan === 'halo') {
-        ctx.reply('hi! welcome kata kentut ganteng.');
-    }
-    if (pesan === 'rachel') {
-        ctx.reply('jelek.');
-    }
-    if (pesan === 'kentut') {
-        ctx.reply('ganteng');
-    }
-    if (pesan === 'fadli') {
-        ctx.reply('cabul');
-    }
-    if (pesan === 'p') {
+    const respon = {
+        'halo': 'hi! welcome kata kentut ganteng.',
+        'rachel': 'RATU', 'rahel': 'RATU', 'ahel': 'RATU',
+        'kentut': 'si ganteng kalem',
+        'fadli': 'CABUL BANGET, kaya monyet',
+        'p': 'p apa', 'pp': 'p apa', 'ppp': 'p apa', 'pppp': 'brisik',
+        'el': 'pangeran belegug',
+        'yupi': 'gemes cenah',
+        'ayaa': 'ayay manis',
+        'nay': 'euy',
+        'f': 'cabul'
+    };
 
-        ctx.reply('p apa');
-    }
-    if (pesan === 'el') {
-        ctx.reply('sunda');
+    if (respon[pesan]) {
+        ctx.reply(respon[pesan], { reply_to_message_id: ctx.message.message_id });
     }
 });
 
-// 4. Pengingat Otomatis (Cron Job)
-cron.schedule('* * * * *', async () => {
-    const d = new Date();
-    const sekarang = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace('.', ':');
-
-    console.log(`[${sekarang}] Mengecek jadwal...`);
-
-    const jadwal = await getJadwalSholat();
-    if (jadwal) {
-        const waktuIbadah = {
-            'Subuh': jadwal.subuh,
-            'Dzuhur': jadwal.dzuhur,
-            'Ashar': jadwal.ashar,
-            'Maghrib': jadwal.maghrib,
-            'Isya': jadwal.isya
-        };
-
-        for (const [nama, waktu] of Object.entries(waktuIbadah)) {
-            if (sekarang === waktu) {
-                const teksRemind = `📣 **WAKTUNYA ${nama.toUpperCase()}**\n\nUntuk wilayah Jakarta dan sekitarnya, mari menunaikan ibadah. abis diingetin sama si ganteng (kentut).\n\nCc: @all anggota grup`;
-                bot.telegram.sendMessage(targetGroupId, teksRemind, { parse_mode: 'Markdown' });
-                console.log(`Reminder ${nama} terkirim!`);
-            }
+// --- Handler untuk Vercel (Webhook) ---
+module.exports = async (req, res) => {
+    try {
+        if (req.method === 'POST') {
+            await bot.handleUpdate(req.body);
+            res.status(200).send('OK');
+        } else {
+            res.status(200).send('Bot is running...');
         }
+    } catch (err) {
+        console.error("Error:", err);
+        res.status(500).send('Error');
     }
-});
-
-cron.schedule('0 8 * * 7', () => { // Setiap hari Minggu jam 08:00 pagi
-    bot.telegram.sendMessage(targetGroupId, "🔔 Selamat pagi! Waktunya bersiap untuk ibadah Kebaktian/Misa hari Minggu.");
-});
-
-bot.launch().then(() => console.log('🚀 Bot Aktif! Coba /tes sekarang.'));
-
-// Graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+};
