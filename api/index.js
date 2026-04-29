@@ -39,6 +39,7 @@ bot.on('text', (ctx) => {
         'yupi': 'gemes cenah',
         'ayaa': 'ayay manis',
         'nay': 'euy',
+        'khanza': 'kang ngamuk',
         'f': 'cabul'
     };
 
@@ -89,3 +90,9 @@ module.exports = async (req, res) => {
         res.status(500).send('Internal Error');
     }
 };
+
+// =============================================================
+// BAGIAN PENGETESAN LOKAL (VS CODE)
+// HAPUS ATAU KASIH TANDA // DI DEPAN BARIS DI BAWAH INI SEBELUM PUSH KE GITHUB!
+// =============================================================
+bot.launch().then(() => console.log("🚀 BOT NYALA DI LOKAL! Terminal tidak akan exit."));
