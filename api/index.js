@@ -71,7 +71,7 @@ module.exports = async (req, res) => {
 
             for (const [nama, waktu] of Object.entries(waktuIbadah)) {
                 if (sekarang === waktu) {
-                    await bot.telegram.sendMessage(targetGroupId, `📣 **WAKTUNYA ${nama.toUpperCase()}**\n\nUntuk wilayah Jakarta dan sekitarnya, mari menunaikan ibadah.\n\nCc: /all anggota grup`, { parse_mode: 'Markdown' });
+                    await bot.telegram.sendMessage(targetGroupId, ` /all 📣 **WAKTUNYA ${nama.toUpperCase()}**\n\nUntuk wilayah Jakarta dan sekitarnya, mari menunaikan ibadah.\n\nCc: anggota grup`, { parse_mode: 'Markdown' });
                 }
             }
             return res.status(200).send('Cron processed');
