@@ -40,6 +40,7 @@ bot.on('text', (ctx) => {
         'ayaa': 'ayay manis',
         'nay': 'euy',
         'khanza': 'kang ngamuk',
+        'kara': 'cool',
         'f': 'cabul'
     };
 
